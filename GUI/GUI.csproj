@@ -4,6 +4,12 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <AssemblyName>SalesOrganizer</AssemblyName>
+    <StartupObject>GUI.App</StartupObject>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Authors>Pyritie</Authors>
+    <Product>Lemon Creme Sales Organizer</Product>
+    <Copyright>(c) Pyritie 2019</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

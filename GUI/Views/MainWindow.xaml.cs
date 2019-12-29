@@ -11,7 +11,7 @@ namespace GUI
         {
             InitializeComponent();
 
-            DataContext = new MainWindowViewModel();
+            DataContext = new MainWindowViewModel(this);
         }
     }
 }

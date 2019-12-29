@@ -11,9 +11,9 @@ namespace GUI
     public class InventoryViewModel : NotifyableObject
     {
         // number of columns before we get to the people %'s
-        private const int c_personHeaderOffset = 3;
+        public const int PersonHeaderOffset = 3;
 
-        private MainWindowViewModel m_owner;
+        private readonly MainWindowViewModel m_owner;
         private string m_filePath;
         private string m_loadError;
 
@@ -50,8 +50,6 @@ namespace GUI
 
 
 
-        private void ClearLoadError() => LoadError = null;
-
         private void BrowseExecute(object o)
         {
             var dlg = new OpenFileDialog()
@@ -65,34 +63,31 @@ namespace GUI
             }
         }
 
-        private void LoadInventory()
+        private bool LoadInventory()
         {
             Items.Clear();
 
             if (!File.Exists(m_filePath))
             {
-                LoadError = "A file with that path does not exist.";
-                return; 
+                return LoadFailure("A file with that path does not exist.");
             }
 
             string[] contents = File.ReadAllLines(m_filePath);
 
             if (contents.Length < 2)
             {
-                LoadError = "File contains no data.";
-                return;
+                return LoadFailure("File contains no data.");
             }
 
             List<Person> people;
             try
             {
                 // name, worth, type, pyritie%, pudding%, crunchy%
-                people = contents[0].Split(',').Skip(c_personHeaderOffset).Select(name => new Person(name.Trim())).ToList();
+                people = contents[0].Split(',').Skip(PersonHeaderOffset).Select(name => new Person(name.Trim())).ToList();
             }
             catch (Exception e)
             {
-                LoadError = "Error when parsing headers: " + e.Message;
-                return;
+                return LoadFailure("Error when parsing headers: " + e.Message);
             }
 
             int line = 1;
@@ -109,20 +104,42 @@ namespace GUI
 
                     var item = new InventoryItem(name, type, worth);
 
+                    decimal totalPercent = 0;
                     for (int i = 0; i < people.Count; i++)
                     {
-                        item.Owners.Add(people[i], decimal.Parse(split[i + c_personHeaderOffset]));
+                        decimal percent = decimal.Parse(split[i + PersonHeaderOffset]);
+                        item.Earners.Add(people[i], percent);
+                        totalPercent += percent;
                     }
+
+                    if (totalPercent != 1)
+                        throw new Exception($"Percentages do not add up to 100% ({name}, {type})");
 
                     Items.Add(item);
                 }
             }
             catch (Exception e)
             {
-                LoadError = $"Error when parsing line {line}: {e.Message}";
-                Items.Clear();
-                return;
+                return LoadFailure($"Error when parsing line {line}: {e.Message}");
             }
+
+            return LoadSuccess(people);
+        }
+
+        private bool LoadSuccess(List<Person> people)
+        {
+            LoadError = null;
+            m_owner.SetUpColumnsForPeople(people);
+            m_owner.CalculateResults();
+            return true;
+        }
+
+        private bool LoadFailure(string error)
+        {
+            LoadError = error;
+            Items.Clear();
+            m_owner.InvalidateResults();
+            return false;
         }
     }
 }

@@ -21,7 +21,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- inventory box -->
-        <GroupBox Grid.Column="0">
+        <GroupBox Grid.Column="0"
+                  Padding="5">
             <GroupBox.Header>
                 <TextBlock Text="Inventory"
                            Style="{StaticResource groupBoxHeaderStyle}"/>
@@ -79,8 +80,36 @@
                     </TextBlock.Style>
                 </TextBlock>
 
-                
-                <!-- table goes here-->
+
+                <DataGrid x:Name="inventoryTable"
+                          Grid.ColumnSpan="5"
+                          Grid.Row="3"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          ItemsSource="{Binding InventoryVM.Items}"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          Margin="0,5,0,0">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="IsHitTestVisible" Value="False"/>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Style>
+                        <Style TargetType="DataGrid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding InventoryVM.Items.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Style>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+                        <DataGridTextColumn Header="Worth" Binding="{Binding Worth, StringFormat='C'}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </GroupBox>
 
