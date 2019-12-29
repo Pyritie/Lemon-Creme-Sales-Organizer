@@ -6,4 +6,9 @@ namespace SalesOrganizer.Models
     {
         IEnumerable<IItem> Items { get; }
     }
+
+    public class Sale : ITransaction
+    {
+        public IEnumerable<IItem> Items { get; }
+    }
 }

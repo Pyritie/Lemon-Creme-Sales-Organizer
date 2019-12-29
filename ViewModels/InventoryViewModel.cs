@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace SalesOrganizer.ViewModels
 {
-    public class InventoryViewModel : NotifyableObject
+    public sealed class InventoryViewModel : NotifyableObject
     {
         // number of columns before we get to the people %'s
         public const int PersonHeaderOffset = 3;
@@ -47,6 +47,12 @@ namespace SalesOrganizer.ViewModels
 
             Items = new ObservableCollection<InventoryItem>();
             BrowseCommand = new DelegateCommand(BrowseExecute);
+
+            string savedPath = RegistryHelper.InventoryFilePath;
+            if (!string.IsNullOrEmpty(savedPath))
+            {
+                FilePath = savedPath;
+            }
         }
 
 
@@ -56,8 +62,13 @@ namespace SalesOrganizer.ViewModels
             var dlg = new OpenFileDialog()
             {
                 Title = "Select the file containing your inventory information",
-                Filter = "Comma Separated Values (*.csv)|*.csv|All Files (*.*)|*.*"
+                Filter = "Comma Separated Values (*.csv)|*.csv|All Files (*.*)|*.*",
             };
+            if (m_filePath != null)
+            {
+                dlg.InitialDirectory = Path.GetDirectoryName(m_filePath);
+            }
+
             if (dlg.ShowDialog() == true)
             {
                 FilePath = dlg.FileName;
@@ -74,7 +85,6 @@ namespace SalesOrganizer.ViewModels
             }
 
             string[] contents = File.ReadAllLines(m_filePath);
-
             if (contents.Length < 2)
             {
                 return LoadFailure("File contains no data.");
@@ -129,9 +139,11 @@ namespace SalesOrganizer.ViewModels
 
         private bool LoadSuccess(List<Person> people)
         {
+            // save the path if it's good
+            RegistryHelper.InventoryFilePath = m_filePath;
+
             LoadError = null;
-            m_owner.SetUpColumnsForPeople(people);
-            m_owner.CalculateResults();
+            m_owner.InventoryLoaded(people);
             return true;
         }
 

@@ -7,21 +7,25 @@ using System.Windows.Data;
 
 namespace SalesOrganizer.ViewModels
 {
-    public class MainWindowViewModel : NotifyableObject
+    public sealed class MainWindowViewModel : NotifyableObject
     {
         private readonly MainWindow m_owner;
         private List<Person> m_people;
 
         public InventoryViewModel InventoryVM { get; }
+        public SalesViewModel SalesVM { get; }
 
         public MainWindowViewModel(MainWindow owner)
         {
             m_owner = owner;
             InventoryVM = new InventoryViewModel(this);
+            SalesVM = new SalesViewModel(this);
         }
 
-        public void SetUpColumnsForPeople(List<Person> people)
+        public void InventoryLoaded(List<Person> people)
         {
+            m_people = people;
+
             // clear off any old ones
             int oldColumnCount = m_owner.inventoryTable.Columns.Count;
             int offset = InventoryViewModel.PersonHeaderOffset;
@@ -34,8 +38,6 @@ namespace SalesOrganizer.ViewModels
             }
 
             // then add new ones
-            m_people = people;
-
             foreach (var person in m_people)
             {
                 m_owner.inventoryTable.Columns.Add(new DataGridTextColumn
