@@ -79,6 +79,7 @@
                     </TextBlock.Style>
                 </TextBlock>
 
+                
                 <!-- table goes here-->
             </Grid>
         </GroupBox>
