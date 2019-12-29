@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Shared
+namespace SalesOrganizer.Generic
 {
     public class NotifyableObject : INotifyPropertyChanged
     {

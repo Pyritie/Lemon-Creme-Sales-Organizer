@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace GUI
+namespace SalesOrganizer
 {
     public partial class App : Application
     {

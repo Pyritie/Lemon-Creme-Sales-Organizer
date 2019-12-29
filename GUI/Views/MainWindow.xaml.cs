@@ -1,6 +1,7 @@
-﻿using System.Windows;
+﻿using SalesOrganizer.ViewModels;
+using System.Windows;
 
-namespace GUI
+namespace SalesOrganizer.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

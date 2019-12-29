@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using SalesOrganizer.Generic;
+using SalesOrganizer.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Microsoft.Win32;
-using Shared;
 
-namespace GUI
+namespace SalesOrganizer.ViewModels
 {
     public class InventoryViewModel : NotifyableObject
     {

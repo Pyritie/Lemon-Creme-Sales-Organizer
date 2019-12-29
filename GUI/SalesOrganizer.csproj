@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <AssemblyName>SalesOrganizer</AssemblyName>
-    <StartupObject>GUI.App</StartupObject>
+    <StartupObject></StartupObject>
     <Platforms>AnyCPU;x64</Platforms>
     <Authors>Pyritie</Authors>
     <Product>Lemon Creme Sales Organizer</Product>
@@ -14,10 +14,6 @@
 
   <ItemGroup>
     <Page Include="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

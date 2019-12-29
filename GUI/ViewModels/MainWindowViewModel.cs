@@ -1,9 +1,11 @@
-﻿using Shared;
+﻿using SalesOrganizer.Generic;
+using SalesOrganizer.Models;
+using SalesOrganizer.Views;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace GUI
+namespace SalesOrganizer.ViewModels
 {
     public class MainWindowViewModel : NotifyableObject
     {
