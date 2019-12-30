@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 
 namespace SalesOrganizer.ViewModels
 {
@@ -15,6 +16,7 @@ namespace SalesOrganizer.ViewModels
         public const int PersonHeaderOffset = 3;
 
         private readonly MainWindowViewModel m_owner;
+        private readonly FileSystemWatcher m_fileWatcher;
         private string m_filePath;
         private string m_loadError;
 
@@ -48,13 +50,16 @@ namespace SalesOrganizer.ViewModels
             Items = new ObservableCollection<InventoryItem>();
             BrowseCommand = new DelegateCommand(BrowseExecute);
 
+            m_fileWatcher = new FileSystemWatcher();
+            m_fileWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size;
+            m_fileWatcher.Changed += OnFileChanged;
+
             string savedPath = RegistryHelper.InventoryFilePath;
             if (!string.IsNullOrEmpty(savedPath))
             {
                 FilePath = savedPath;
             }
         }
-
 
 
         private void BrowseExecute(object o)
@@ -81,10 +86,25 @@ namespace SalesOrganizer.ViewModels
 
             if (!File.Exists(m_filePath))
             {
+                m_fileWatcher.EnableRaisingEvents = false;
                 return LoadFailure("A file with that path does not exist.");
             }
 
-            string[] contents = File.ReadAllLines(m_filePath);
+            // as long as the path is good, we want to watch the file
+            m_fileWatcher.Path = Path.GetDirectoryName(m_filePath);
+            m_fileWatcher.Filter = Path.GetFileName(m_filePath);
+            m_fileWatcher.EnableRaisingEvents = true;
+
+            string[] contents;
+            try
+            {
+                contents = File.ReadAllLines(m_filePath);
+            }
+            catch (Exception e)
+            {
+                return LoadFailure("Error when reading file: " + e.Message);
+            }
+
             if (contents.Length < 2)
             {
                 return LoadFailure("File contains no data.");
@@ -110,15 +130,22 @@ namespace SalesOrganizer.ViewModels
 
                     // latias, 7.50, charm, 1, 0, 0
                     string name = split[0].Trim();
-                    decimal worth = decimal.Parse(split[1]);
                     string type = split[2].Trim();
+
+                    if (!decimal.TryParse(split[1], out decimal worth))
+                        throw new Exception($"Couldn't parse item worth column ({name}, {type})");
 
                     var item = new InventoryItem(name, type, worth);
 
                     decimal totalPercent = 0;
                     for (int i = 0; i < people.Count; i++)
                     {
-                        decimal percent = decimal.Parse(split[i + PersonHeaderOffset]);
+                        if (!decimal.TryParse(split[i + PersonHeaderOffset], out decimal percent))
+                            throw new Exception($"Couldn't parse {people[i]} % column ({name}, {type})");
+
+                        if (percent > 1 || percent < 0)
+                            throw new Exception($"{people[i]} % column value must be between 0 and 1, inclusive ({name}, {type})");
+
                         item.Earners.Add(people[i], percent);
                         totalPercent += percent;
                     }
@@ -131,7 +158,7 @@ namespace SalesOrganizer.ViewModels
             }
             catch (Exception e)
             {
-                return LoadFailure($"Error when parsing line {line}: {e.Message}");
+                return LoadFailure($"Error on line {line + 1}: {e.Message}");
             }
 
             return LoadSuccess(people);
@@ -153,6 +180,15 @@ namespace SalesOrganizer.ViewModels
             Items.Clear();
             m_owner.InvalidateResults();
             return false;
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if (e.FullPath.Replace('\\', '/').Equals(m_filePath?.Replace('\\', '/'), StringComparison.OrdinalIgnoreCase))
+            {
+                // the file watcher has its own thread so we need to run this on the wpf thread
+                Application.Current.Dispatcher.Invoke(LoadInventory);
+            }
         }
     }
 }

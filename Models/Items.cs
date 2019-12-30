@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SalesOrganizer.Models
 {
@@ -9,6 +10,7 @@ namespace SalesOrganizer.Models
         decimal Worth { get; }
     }
 
+    [DebuggerDisplay("InventoryItem ({Name}, {Type})")]
     public class InventoryItem : IItem
     {
         public string Name { get; }
@@ -49,12 +51,13 @@ namespace SalesOrganizer.Models
                         if (kvp.Key.Name == name)
                             return kvp.Value;
                     }
-                    return -1;
+                    return 0;
                 }
             }
         }
     }
 
+    [DebuggerDisplay("TaxItem ({Worth})")]
     public class TaxItem : IItem
     {
         public string Name => "Tax";

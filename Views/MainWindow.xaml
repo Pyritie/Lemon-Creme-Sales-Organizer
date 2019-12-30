@@ -69,6 +69,7 @@
                         Grid.Row="1" />
 
                 <TextBlock Text="{Binding InventoryVM.LoadError}"
+                           TextWrapping="Wrap"
                            Foreground="Red"
                            Grid.ColumnSpan="5"
                            Grid.Row="2">
@@ -191,6 +192,7 @@
 
                     <TextBlock Text="{Binding SalesVM.LoadError}"
                                Foreground="Red"
+                               TextWrapping="Wrap"
                                Grid.ColumnSpan="5"
                                Grid.Row="1">
                         <TextBlock.Style>
