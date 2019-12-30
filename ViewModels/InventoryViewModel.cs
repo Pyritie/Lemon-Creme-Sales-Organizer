@@ -133,7 +133,7 @@ namespace SalesOrganizer.ViewModels
                     string type = split[2].Trim();
 
                     if (!decimal.TryParse(split[1], out decimal worth))
-                        throw new Exception($"Couldn't parse item worth column ({name}, {type})");
+                        return LoadFailure($"Couldn't parse item worth column (line {line + 1}: {name}, {type})");
 
                     var item = new InventoryItem(name, type, worth);
 
@@ -141,17 +141,17 @@ namespace SalesOrganizer.ViewModels
                     for (int i = 0; i < people.Count; i++)
                     {
                         if (!decimal.TryParse(split[i + PersonHeaderOffset], out decimal percent))
-                            throw new Exception($"Couldn't parse {people[i]} % column ({name}, {type})");
+                            return LoadFailure($"Couldn't parse {people[i]} % column (line {line + 1}: {name}, {type})");
 
                         if (percent > 1 || percent < 0)
-                            throw new Exception($"{people[i]} % column value must be between 0 and 1, inclusive ({name}, {type})");
+                            return LoadFailure($"{people[i]} % column value must be between 0 and 1, inclusive (line {line + 1}: {name}, {type})");
 
                         item.Earners.Add(people[i], percent);
                         totalPercent += percent;
                     }
 
                     if (totalPercent != 1)
-                        throw new Exception($"Percentages do not add up to 100% ({name}, {type})");
+                        return LoadFailure($"Percentages do not add up to 100% (line {line + 1}: {name}, {type})");
 
                     Items.Add(item);
                 }
